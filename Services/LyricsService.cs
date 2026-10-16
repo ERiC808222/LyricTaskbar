@@ -21,7 +21,7 @@ public class LyricsService
     public LyricsService(HttpClient? http = null, LocalLyricsStore? local = null, LyricsSourceMode mode = LyricsSourceMode.Auto)
     {
         _http = http ?? new HttpClient { Timeout = TimeSpan.FromSeconds(7) };
-        _http.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "LyricBarJP/1.2 (personal desktop lyrics)");
+        _http.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "LyricTaskbar/1.5.2 (desktop lyrics)");
         _local = local ?? new LocalLyricsStore();
         _apple = new AppleLyricsSource(http);
         _amll = new AmllLyricsSource(http);

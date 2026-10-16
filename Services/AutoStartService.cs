@@ -10,25 +10,32 @@ public interface IAutoStartStore
     void Remove();
 }
 
-/// <summary>Owns one value in the current user's Windows login Run key.</summary>
+/// <summary>Owns the current and legacy application values in the user's Windows login Run key.</summary>
 public sealed class RegistryAutoStartStore(string keyPath = RegistryAutoStartStore.RunKey) : IAutoStartStore
 {
     public const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
-    public const string ValueName = "LyricBarJP";
+    public const string ValueName = "LyricTaskbar";
+    public const string LegacyValueName = "LyricBarJP";
     public string? Read()
     {
         using var key = Registry.CurrentUser.OpenSubKey(keyPath, writable: false);
-        return key?.GetValue(ValueName) as string;
+        var current = key?.GetValue(ValueName) as string;
+        return !string.IsNullOrWhiteSpace(current) ? current : key?.GetValue(LegacyValueName) as string;
     }
     public void Write(string command)
     {
         using var key = Registry.CurrentUser.CreateSubKey(keyPath, writable: true);
         key.SetValue(ValueName, command, RegistryValueKind.String);
+        // Remove the old name only after the replacement is confirmed, avoiding duplicate starts.
+        if (!string.Equals(key.GetValue(ValueName) as string, command, StringComparison.Ordinal))
+            throw new IOException("The replacement login entry could not be saved.");
+        key.DeleteValue(LegacyValueName, throwOnMissingValue: false);
     }
     public void Remove()
     {
         using var key = Registry.CurrentUser.OpenSubKey(keyPath, writable: true);
         key?.DeleteValue(ValueName, throwOnMissingValue: false);
+        key?.DeleteValue(LegacyValueName, throwOnMissingValue: false);
     }
 }
 
@@ -39,15 +46,17 @@ public sealed class AutoStartService
     public AutoStartService(IAutoStartStore? store = null, string? executable = null)
     {
         _store = store ?? new RegistryAutoStartStore();
-        _executable = executable ?? Environment.ProcessPath ?? Path.Combine(AppContext.BaseDirectory, "LyricBarJP.exe");
+        _executable = executable ?? Environment.ProcessPath ?? Path.Combine(AppContext.BaseDirectory, "LyricTaskbar.exe");
     }
     public bool IsEnabled => !string.IsNullOrWhiteSpace(_store.Read());
     public static bool IsStartupInvocation(string[] args) => args.Length == 1 && args[0] == "--startup";
     public static string CommandFor(string executable)
     {
         var path = Path.GetFullPath(executable);
-        if (!string.Equals(Path.GetFileName(path), "LyricBarJP.exe", StringComparison.OrdinalIgnoreCase) || path.Contains('"'))
-            throw new InvalidOperationException("Use the published LyricBarJP.exe to configure auto-start.");
+        string name = Path.GetFileName(path);
+        if ((!string.Equals(name, "LyricTaskbar.exe", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(name, "LyricBarJP.exe", StringComparison.OrdinalIgnoreCase)) || path.Contains('"'))
+            throw new InvalidOperationException("Use the published LyricTaskbar.exe to configure auto-start.");
         return $"\"{path}\" --startup";
     }
     public void SetEnabled(bool enabled)

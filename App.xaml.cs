@@ -51,6 +51,7 @@ namespace DesktopLyrics
                 return;
             }
 
+            // Retain the legacy mutex so old and renamed versions cannot run together.
             _instanceMutex = new System.Threading.Mutex(true, "Local\\LyricBarJP-Personal", out var created);
             if (!created) { Shutdown(); return; }
 
@@ -76,7 +77,7 @@ namespace DesktopLyrics
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[AutoStart] {ex.Message}"); }
             _lyricsService = new LyricsService();
             _mediaService = new MediaSessionService();
-            // Personal build keeps its Japanese additions; upstream update prompts are disabled.
+            // Automatic update prompts remain disabled for this derivative.
             _viewModel = new LyricsViewModel(_mediaService, _lyricsService, _settingsService);
 
             _lyricsWindow = new TaskbarLyricsWindow(_viewModel);
@@ -112,7 +113,7 @@ namespace DesktopLyrics
             _notifyIcon = new NotifyIcon
             {
                 Icon = _appIcon,
-                Text = "LyricBar JP - 多语言双语歌词",
+                Text = "LyricTaskbar - 多语言双语歌词",
                 Visible = true
             };
 
@@ -225,7 +226,7 @@ namespace DesktopLyrics
             {
                 MessageBox.Show(
                     I18n.AboutDialog(UpdateCheckService.CurrentVersion),
-                    "LyricBar",
+                    "LyricTaskbar",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
             });
@@ -292,7 +293,7 @@ namespace DesktopLyrics
             autoStartItem.Click += (s, e) =>
             {
                 try { _autoStartService?.SetEnabled(!(_autoStartService?.IsEnabled ?? false)); }
-                catch (Exception ex) { MessageBox.Show(I18n.AutoStartFailed + "\n" + ex.Message, "LyricBar JP", MessageBoxButton.OK, MessageBoxImage.Warning); }
+                catch (Exception ex) { MessageBox.Show(I18n.AutoStartFailed + "\n" + ex.Message, "LyricTaskbar", MessageBoxButton.OK, MessageBoxImage.Warning); }
                 RefreshAutoStartItem();
             };
             RefreshAutoStartItem();
@@ -321,7 +322,7 @@ namespace DesktopLyrics
         {
             if (_mediaService?.CurrentTrack.IsEmpty != false)
             {
-                MessageBox.Show(I18n.PlayFirst, "LyricBar JP"); return;
+                MessageBox.Show(I18n.PlayFirst, "LyricTaskbar"); return;
             }
             try
             {
@@ -332,7 +333,7 @@ namespace DesktopLyrics
                 if (translated.ShowDialog() == DialogResult.OK) translation = LocalLyricsStore.ReadLrcFile(translated.FileName);
                 _viewModel?.ImportLyrics(LocalLyricsStore.ReadLrcFile(original.FileName), translation);
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message, "LyricBar JP", MessageBoxButton.OK, MessageBoxImage.Warning); }
+            catch (Exception ex) { MessageBox.Show(ex.Message, "LyricTaskbar", MessageBoxButton.OK, MessageBoxImage.Warning); }
         }
 
         private void PopulateMonitorMenu(ToolStripMenuItem monitorMenu)

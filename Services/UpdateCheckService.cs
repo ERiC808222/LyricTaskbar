@@ -10,8 +10,8 @@ namespace DesktopLyrics.Services
 {
     public class UpdateCheckService
     {
-        public const string CurrentVersion = "v1.5.1-personal";
-        private const string GitHubApiLatestUrl = "https://api.github.com/repos/ysheng920/LyricBar/releases/latest";
+        public const string CurrentVersion = "v1.5.2";
+        private const string GitHubApiLatestUrl = "https://api.github.com/repos/ERiC808222/LyricTaskbar/releases/latest";
 
         private readonly HttpClient _httpClient;
         private readonly DispatcherTimer _periodicTimer;
@@ -28,7 +28,7 @@ namespace DesktopLyrics.Services
             {
                 Timeout = TimeSpan.FromSeconds(8)
             };
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "LyricBar-UpdateChecker");
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "LyricTaskbar-UpdateChecker");
 
             // Periodic check every 6 hours
             _periodicTimer = new DispatcherTimer
@@ -57,7 +57,7 @@ namespace DesktopLyrics.Services
                 {
                     LatestVersion = release.TagName.Trim();
                     LatestReleaseUrl = string.IsNullOrWhiteSpace(release.HtmlUrl)
-                        ? "https://github.com/ysheng920/LyricBar/releases/latest"
+                        ? "https://github.com/ERiC808222/LyricTaskbar/releases/latest"
                         : release.HtmlUrl;
 
                     if (IsNewerVersion(LatestVersion, CurrentVersion))
@@ -102,7 +102,7 @@ namespace DesktopLyrics.Services
             try
             {
                 var targetUrl = string.IsNullOrWhiteSpace(url)
-                    ? "https://github.com/ysheng920/LyricBar/releases/latest"
+                    ? "https://github.com/ERiC808222/LyricTaskbar/releases/latest"
                     : url;
 
                 Process.Start(new ProcessStartInfo

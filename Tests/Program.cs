@@ -8,7 +8,7 @@ using DesktopLyrics.Services;
 
 var count = 0;
 void Check(bool condition, string name) { if (!condition) throw new Exception(name); Console.WriteLine("PASS " + name); count++; }
-var scratch = Path.Combine(Path.GetTempPath(), "LyricBar-tests-" + Guid.NewGuid());
+var scratch = Path.Combine(Path.GetTempPath(), "LyricTaskbar-tests-" + Guid.NewGuid());
 Directory.CreateDirectory(scratch);
 
 var lines = LrcParser.ParseBilingual("[offset:+100]\n[00:01.050]窓の光\n[00:02.000]\n[00:03.000]雨の音", "[offset:+100]\n[00:01.070]窗边的光\n[00:09.000]不要错配");
@@ -50,7 +50,7 @@ AutoStartChecks.Run(Check, scratch);
 FullscreenChecks.Run(Check, scratch);
 DisplayPlacementChecks.Run(Check);
 await MultilingualChecks.Run(Check, scratch);
-foreach (var language in Enum.GetValues<AppLanguage>()) { I18n.CurrentLanguage = language; Check(I18n.SelectTranslation.Length > 0 && I18n.AboutDialog("1.2").Length > 0, "localized UI " + language); }
+foreach (var language in Enum.GetValues<AppLanguage>()) { I18n.CurrentLanguage = language; Check(I18n.SelectTranslation.Length > 0 && I18n.AboutDialog("1.2").Contains("LyricTaskbar") && I18n.AboutMenu.Contains("LyricTaskbar"), "localized UI " + language); }
 Console.WriteLine($"{count} checks passed.");
 
 sealed class FakeHandler(bool qqTranslation) : HttpMessageHandler

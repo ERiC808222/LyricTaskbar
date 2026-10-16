@@ -1,4 +1,4 @@
 @echo off
 cd /d "%~dp0"
-dotnet run --project "%~dp0LyricBar.csproj" -c Release
+dotnet run --project "%~dp0LyricTaskbar.csproj" -c Release
 exit /b %errorlevel%

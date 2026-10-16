@@ -31,7 +31,7 @@ public static class MultilingualDiagnostics
         Directory.CreateDirectory(folder); var checks = new List<string>();
         void Check(bool value, string name) { if (!value) throw new InvalidOperationException(name); checks.Add(name); }
         var media = new MediaSessionService(); var settings = new SettingsService(Path.Combine(folder, "isolated-settings"));
-        var model = new LyricsViewModel(media, new LyricsService(), settings) { Theme = AppTheme.Dark, TrackTitle = "Multilingual demo", TrackArtist = "LyricBar JP", CoverArt = DemoCover(Color.FromRgb(230, 82, 94)) };
+        var model = new LyricsViewModel(media, new LyricsService(), settings) { Theme = AppTheme.Dark, TrackTitle = "Multilingual demo", TrackArtist = "LyricTaskbar", CoverArt = DemoCover(Color.FromRgb(230, 82, 94)) };
         var samples = new Dictionary<string, (string Original, string Chinese)>
         {
             ["korean"] = ("봄빛이 창가에 머물러요", "春光停在窗边"), ["tibetan"] = ("བོད་སྐད་ཀྱི་གླུ་དབྱངས་སྙན་མོ།", "藏语歌声悠扬"),

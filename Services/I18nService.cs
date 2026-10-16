@@ -90,8 +90,8 @@ public static class I18n
     public static string NewVersionFound(string tag) => tag;
     public static string NewVersionNotificationTitle(string tag) => tag;
     public static string NewVersionNotificationBody => T("View upstream releases", "查看原版发布", "元のリリースを表示");
-    public static string AboutMenu => T("About LyricBar JP", "关于 LyricBar JP", "LyricBar JPについて");
-    public static string AboutDialog(string version) => $"LyricBar JP {version}\n" + T("Multilingual lyrics with available Chinese translations. Based on ysheng920/LyricBar (MIT).", "多语言原歌词＋现有中文译文。基于 ysheng920/LyricBar（MIT），保留原版许可。", "多言語の歌詞＋既存の中国語訳。ysheng920/LyricBar（MIT）を基に作成。");
+    public static string AboutMenu => T("About LyricTaskbar", "关于 LyricTaskbar", "LyricTaskbarについて");
+    public static string AboutDialog(string version) => $"LyricTaskbar {version}\n" + T("Multilingual lyrics with available Chinese translations. Based on ysheng920/LyricBar (MIT).", "多语言原歌词＋现有中文译文。基于 ysheng920/LyricBar（MIT），保留原版许可。", "多言語の歌詞＋既存の中国語訳。ysheng920/LyricBar（MIT）を基に作成。");
     public static string LyricsSourceMenu => T("Lyrics source", "歌词来源", "歌詞の取得先");
     public static string SourceModeName(LyricsSourceMode mode) => mode switch
     {

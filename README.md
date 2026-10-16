@@ -1,12 +1,12 @@
-<p align="center"><img src="Assets/AppIcon.png" width="96" alt="LyricBar JP 图标" /></p>
+<p align="center"><img src="Assets/AppIcon.png" width="96" alt="LyricTaskbar 图标" /></p>
 
-# LyricBar JP
+# LyricTaskbar
 
 Windows 11 任务栏歌词工具，优先识别 Windows 版 Apple Music，显示原文歌词和已有中文译文。
 
-基于 [ysheng920/LyricBar](https://github.com/ysheng920/LyricBar) 的独立修改版，沿用 MIT 许可证。当前版本 **1.5.1**。
+基于 [ysheng920/LyricBar](https://github.com/ysheng920/LyricBar) 的独立修改版，沿用 MIT 许可证。当前版本 **1.5.2**。
 
-[下载 Windows x64 版](https://github.com/ERiC808222/LyricBar-JP/releases/latest) · [更新记录](CHANGELOG.md) · [项目来源](UPSTREAM.md) · [验证范围](docs/VALIDATION.md)
+[下载 Windows x64 版](https://github.com/ERiC808222/LyricTaskbar/releases/latest) · [更新记录](CHANGELOG.md) · [项目来源](UPSTREAM.md) · [验证范围](docs/VALIDATION.md)
 
 ## 功能
 
@@ -28,10 +28,12 @@ Windows 11 任务栏歌词工具，优先识别 Windows 版 Apple Music，显示
 
 ## 下载与使用
 
-1. 在 [Releases](https://github.com/ERiC808222/LyricBar-JP/releases/latest) 下载 `LyricBar-JP-v1.5.1-win-x64.zip`，解压到固定目录。
+1. 在 [Releases](https://github.com/ERiC808222/LyricTaskbar/releases/latest) 下载 `LyricTaskbar-v1.5.2-win-x64.zip`，解压到固定目录。
 2. 安装 **.NET 9 Desktop Runtime x64**（需要 Desktop Runtime，而不是仅 .NET Runtime）。[微软下载页](https://dotnet.microsoft.com/download/dotnet/9.0)。
-3. 运行 `LyricBarJP.exe`，再打开 Windows 版 Apple Music 播放歌曲。
+3. 运行 `LyricTaskbar.exe`，再打开 Windows 版 Apple Music 播放歌曲。
 4. 右键托盘图标设置歌词来源、界面语言、显示效果、开机自启等；双击托盘图标切换位置锁定。
+
+本项目原名 LyricBar JP，1.5.2 起改名为 **LyricTaskbar**。从旧版更新时，可将原 `Data` 目录放到新 EXE 旁；已开启的开机自启会迁移至新名称和路径，关闭状态不会自动开启。
 
 程序使用便携式配置：设置、导入歌词与索引缓存存放在 EXE 旁的 `Data` 目录。请使用有写权限的文件夹。更新时退出旧版、替换程序，保留原 `Data` 目录；开机自启已开启时，运行新位置的程序会更新该启动路径。
 
@@ -53,33 +55,33 @@ Windows 11 任务栏歌词工具，优先识别 Windows 版 Apple Music，显示
 需要 Windows x64 和 .NET 9 SDK：
 
 ```powershell
-git clone https://github.com/ERiC808222/LyricBar-JP.git
-cd LyricBar-JP
-powershell -NoProfile -ExecutionPolicy Bypass -File Build-JP.ps1
+git clone https://github.com/ERiC808222/LyricTaskbar.git
+cd LyricTaskbar
+powershell -NoProfile -ExecutionPolicy Bypass -File Build.ps1
 ```
 
-程序位于 `publish/LyricBarJP.exe`。默认依赖桌面运行库；如需将运行库一并打包：
+程序位于 `publish/LyricTaskbar.exe`。默认依赖桌面运行库；如需将运行库一并打包：
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File Build-JP.ps1 -SelfContained
+powershell -NoProfile -ExecutionPolicy Bypass -File Build.ps1 -SelfContained
 ```
 
 运行行为检查（不会改变音乐播放）：
 
 ```powershell
-dotnet run --project Tests/LyricBar.Tests.csproj -c Release
+dotnet run --project Tests/LyricTaskbar.Tests.csproj -c Release
 ```
 
 Windows 实际窗口诊断使用屏幕外测试窗口，输出 JSON：
 
 ```powershell
-.\publish\LyricBarJP.exe --verify-visibility visibility.json
-.\publish\LyricBarJP.exe --verify-fullscreen fullscreen.json
-.\publish\LyricBarJP.exe --render-multilingual motion-proof
+.\publish\LyricTaskbar.exe --verify-visibility visibility.json
+.\publish\LyricTaskbar.exe --verify-fullscreen fullscreen.json
+.\publish\LyricTaskbar.exe --render-multilingual motion-proof
 ```
 
 ## 来源与许可证
 
 原项目：[ysheng920/LyricBar](https://github.com/ysheng920/LyricBar)，基于提交 `8d21e853ff2ada701e25a3a362904a5f4ea5be3a`。保留原作者和贡献者的 MIT 版权声明；详见 [LICENSE](LICENSE) 和 [UPSTREAM.md](UPSTREAM.md)。本项目与 Apple 无隶属关系。
 
-LyricBar JP is a Windows 11 taskbar lyrics overlay derived from LyricBar. It prioritizes Apple Music media sessions, supports multilingual original lyrics with existing Chinese translations, and includes configurable transitions, timing offsets, fullscreen behavior and DPI-safe recovery. Windows x64 and .NET 9 Desktop Runtime are required.
+LyricTaskbar is a Windows 11 taskbar lyrics overlay derived from LyricBar. It prioritizes Apple Music media sessions, supports multilingual original lyrics with existing Chinese translations, and includes configurable transitions, timing offsets, fullscreen behavior and DPI-safe recovery. Windows x64 and .NET 9 Desktop Runtime are required.

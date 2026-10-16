@@ -1,5 +1,7 @@
 # Project origin
 
+Current project: **LyricTaskbar** (formerly LyricBar JP). The repository and executable were renamed in 1.5.2; upstream attribution and license remain unchanged.
+
 - Upstream: [ysheng920/LyricBar](https://github.com/ysheng920/LyricBar)
 - Base commit: `8d21e853ff2ada701e25a3a362904a5f4ea5be3a`
 - License: MIT; the original notice is retained verbatim in `LICENSE`.

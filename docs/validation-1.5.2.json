@@ -1,0 +1,104 @@
+{
+  "application": "LyricTaskbar",
+  "version": "1.5.2",
+  "date": "2026-10-16",
+  "sdk": "9.0.318",
+  "behaviorChecks": 121,
+  "windowsFileBranding": {
+    "productName": "LyricTaskbar",
+    "fileDescription": "LyricTaskbar",
+    "fileVersion": "1.5.2.0",
+    "verified": true
+  },
+  "publicBuild": {
+    "debugSymbols": false,
+    "sourcePathsMapped": true,
+    "personalPathScanPassed": true
+  },
+  "visibility": {
+    "passed": true,
+    "checks": [
+      "startup recovers legacy offscreen position using native pixels even when position is locked",
+      "repeated reset actions remain visible within the target taskbar",
+      "refresh preserves an already valid position",
+      "refresh restores offscreen lyrics before awaiting the lyrics source",
+      "refresh restores a hidden WPF window without requiring a program restart",
+      "native-hidden HWND is reproduced independently of WPF visibility",
+      "refresh restores native visibility when WPF still thinks the window is shown",
+      "a failed lyrics refresh still runs visibility recovery",
+      "corrected position persists using WPF coordinates instead of native pixels",
+      "recovery preserves lyric text, timing, lock and fullscreen settings",
+      "manual recovery respects the user's fullscreen hiding preference",
+      "resetting a fullscreen-hidden window preserves its visibility and topmost policy",
+      "leaving fullscreen restores the recovered window",
+      "tray icon loads from the same embedded multi-size executable icon asset",
+      "reset, refresh and recovery never steal foreground focus"
+    ],
+    "actualScale": 1.25
+  },
+  "fullscreen": {
+    "passed": true,
+    "checks": [
+      "lyrics are visible and topmost on the normal desktop",
+      "disabled fullscreen overlay hides and removes topmost status",
+      "enabling fullscreen overlay restores the real WPF window immediately",
+      "disabling overlay during fullscreen hides the real window immediately",
+      "leaving fullscreen restores lyrics without moving the window",
+      "hiding and restoring lyrics does not steal foreground focus",
+      "the last user preference is saved",
+      "closing a hidden window stops the watcher without resurrecting it"
+    ]
+  },
+  "autoStartMigration": {
+    "passed": true,
+    "checks": [
+      "default off on a real registry store",
+      "published executable is quoted and registered with --startup",
+      "disabling removes the owned registry value",
+      "existing legacy registry name is detected as enabled",
+      "legacy login entry migrates to the new name and executable with no duplicate entry",
+      "disabling clears both owned login names so the old version cannot restart",
+      "unrelated registry values are preserved",
+      "real Windows auto-start setting remains unchanged",
+      "temporary test key is removed"
+    ],
+    "actualAutoStartChanged": false,
+    "limitation": "Enable/disable exercised in an isolated real HKCU key; Windows sign-in was not performed."
+  },
+  "multilingualMotion": {
+    "passed": true,
+    "checks": [
+      "Tibetan sample has actual glyph coverage in Microsoft Himalaya",
+      "Crossfade runs a paired fade",
+      "Crossfade leaves no animation or mask residue",
+      "SlideFromLeft runs a paired fade",
+      "left entrance animates a render transform",
+      "SlideFromLeft leaves no animation or mask residue",
+      "SlideFromBottom runs a paired fade",
+      "bottom entrance animates a render transform",
+      "SlideFromBottom leaves no animation or mask residue",
+      "RevealFromLeft runs a paired fade",
+      "left reveal uses an opacity mask",
+      "RevealFromLeft leaves no animation or mask residue",
+      "cover title and artist commit as one snapshot",
+      "track metadata crossfade has no empty frame",
+      "interrupted track transitions cannot restore stale metadata",
+      "repeated cover refreshes do not restart whole-track fades",
+      "image content is clipped to six-pixel rounded corners"
+    ],
+    "samples": [
+      "korean",
+      "tibetan",
+      "french",
+      "spanish"
+    ],
+    "notes": "Original demonstration text and synthetic album images; real WPF rendering and animation clocks."
+  },
+  "compatibility": {
+    "settingsFormatUnchanged": true,
+    "legacySingletonMutexRetained": true,
+    "legacyAutoStartNameDetected": true,
+    "legacyExecutableFilenameAccepted": true
+  },
+  "scope": "Real diagnostic windows outside the desktop and isolated real HKCU auto-start keys. No actual Windows sign-in, continuous-playback listening or exclusive-fullscreen game test."
+}

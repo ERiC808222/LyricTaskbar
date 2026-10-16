@@ -6,7 +6,7 @@ internal static class AutoStartChecks
     public static void Run(Action<bool, string> check, string scratch)
     {
         var store = new FakeStore();
-        var executable = Path.Combine(scratch, "歌词程序 with spaces", "LyricBarJP.exe");
+        var executable = Path.Combine(scratch, "歌词程序 with spaces", "LyricTaskbar.exe");
         Directory.CreateDirectory(Path.GetDirectoryName(executable)!); File.WriteAllText(executable, "isolated executable fixture");
         var service = new AutoStartService(store, executable);
         service.RefreshRegisteredPath();
@@ -20,10 +20,12 @@ internal static class AutoStartChecks
         check(store.Command == AutoStartService.CommandFor(executable), "an already-enabled entry follows the new release location");
         int writes = store.Writes; service.RefreshRegisteredPath();
         check(store.Writes == writes, "unchanged startup paths are not repeatedly rewritten");
+        var legacyExecutable = Path.Combine(scratch, "旧版文件夹", "LyricBarJP.exe");
+        check(AutoStartService.CommandFor(legacyExecutable) == $"\"{legacyExecutable}\" --startup", "legacy executable filename remains accepted when upgrading in place");
         check(AutoStartService.IsStartupInvocation(new[] { "--startup" }) && !AutoStartService.IsStartupInvocation(Array.Empty<string>()) && !AutoStartService.IsStartupInvocation(new[] { "--probe", "a" }), "login launch is accepted without confusing diagnostic commands");
         try { AutoStartService.CommandFor(Path.Combine(scratch, "dotnet.exe")); check(false, "invalid launch host"); }
         catch (InvalidOperationException) { check(true, "the dotnet host cannot accidentally become the startup application"); }
-        var missing = new AutoStartService(new FakeStore(), Path.Combine(scratch, "missing", "LyricBarJP.exe"));
+        var missing = new AutoStartService(new FakeStore(), Path.Combine(scratch, "missing", "LyricTaskbar.exe"));
         try { missing.SetEnabled(true); check(false, "missing startup executable"); }
         catch (FileNotFoundException) { check(!missing.IsEnabled, "missing executables cannot create a broken startup entry"); }
         var failedStore = new FakeStore { RejectWrites = true };
