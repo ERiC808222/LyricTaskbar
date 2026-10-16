@@ -1,0 +1,27 @@
+# Build and editor output
+**/[Bb]in/
+**/[Oo]bj/
+publish/
+dist/
+.vs/
+.vscode/
+*.user
+*.userosscache
+*.pdb
+
+# Portable settings, lyrics, logs and local diagnostic results
+**/[Dd]ata/
+**/test-data/
+**/*isolated-settings*/
+settings.json
+DesktopLyrics.settings.json
+*.local
+*.log
+diagnostics-error.txt
+
+# Local credentials
+.env
+.env.*
+*.pfx
+*.p12
+*.key

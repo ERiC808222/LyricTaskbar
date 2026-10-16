@@ -1,0 +1,155 @@
+{
+  "version": "1.5.1",
+  "date": "2026-10-14",
+  "behaviorChecks": 120,
+  "build": {
+    "sdk": "9.0.318",
+    "errors": 0,
+    "warnings": 0
+  },
+  "publishedVisibility": {
+    "passed": true,
+    "checks": [
+      "startup recovers legacy offscreen position using native pixels even when position is locked",
+      "repeated reset actions remain visible within the target taskbar",
+      "refresh preserves an already valid position",
+      "refresh restores offscreen lyrics before awaiting the lyrics source",
+      "refresh restores a hidden WPF window without requiring a program restart",
+      "native-hidden HWND is reproduced independently of WPF visibility",
+      "refresh restores native visibility when WPF still thinks the window is shown",
+      "a failed lyrics refresh still runs visibility recovery",
+      "corrected position persists using WPF coordinates instead of native pixels",
+      "recovery preserves lyric text, timing, lock and fullscreen settings",
+      "manual recovery respects the user's fullscreen hiding preference",
+      "resetting a fullscreen-hidden window preserves its visibility and topmost policy",
+      "leaving fullscreen restores the recovered window",
+      "tray icon loads from the same embedded multi-size executable icon asset",
+      "reset, refresh and recovery never steal foreground focus"
+    ],
+    "actualScale": 1.25,
+    "method": "Real WPF window, native HWND hiding, shared tray handlers and injected offscreen display; no user application or music playback was changed."
+  },
+  "publishedFullscreen": {
+    "passed": true,
+    "checks": [
+      "lyrics are visible and topmost on the normal desktop",
+      "disabled fullscreen overlay hides and removes topmost status",
+      "enabling fullscreen overlay restores the real WPF window immediately",
+      "disabling overlay during fullscreen hides the real window immediately",
+      "leaving fullscreen restores lyrics without moving the window",
+      "hiding and restoring lyrics does not steal foreground focus",
+      "the last user preference is saved",
+      "closing a hidden window stops the watcher without resurrecting it"
+    ],
+    "method": "Real offscreen WPF window and timer with injected fullscreen detection; foreground focus and settings persistence checked.",
+    "limitations": "Did not take over the desktop or test exclusive fullscreen games."
+  },
+  "publishedMultilingualMotion": {
+    "passed": true,
+    "checks": [
+      "Tibetan sample has actual glyph coverage in Microsoft Himalaya",
+      "Crossfade runs a paired fade",
+      "Crossfade leaves no animation or mask residue",
+      "SlideFromLeft runs a paired fade",
+      "left entrance animates a render transform",
+      "SlideFromLeft leaves no animation or mask residue",
+      "SlideFromBottom runs a paired fade",
+      "bottom entrance animates a render transform",
+      "SlideFromBottom leaves no animation or mask residue",
+      "RevealFromLeft runs a paired fade",
+      "left reveal uses an opacity mask",
+      "RevealFromLeft leaves no animation or mask residue",
+      "cover title and artist commit as one snapshot",
+      "track metadata crossfade has no empty frame",
+      "interrupted track transitions cannot restore stale metadata",
+      "repeated cover refreshes do not restart whole-track fades",
+      "image content is clipped to six-pixel rounded corners"
+    ],
+    "samples": [
+      "korean",
+      "tibetan",
+      "french",
+      "spanish"
+    ],
+    "notes": "Original demonstration text and synthetic album images; real WPF rendering and animation clocks."
+  },
+  "icon": {
+    "passed": true,
+    "icoSizes": [
+      16,
+      24,
+      32,
+      48,
+      64,
+      128,
+      256
+    ],
+    "shellExtractedLarge": 32,
+    "shellExtractedSmall": 16,
+    "traySharesEmbeddedResource": true,
+    "originalArtwork": true
+  },
+  "sourceTrialsFromPreviousVersion": {
+    "version": "1.5.0",
+    "repeatedThisTime": false,
+    "results": {
+      "korean": {
+        "language": "Korean",
+        "title": "봄날",
+        "artist": "BTS",
+        "source": "LRCLIB",
+        "sourceUrl": "https://lrclib.net/",
+        "lines": 51,
+        "originalLines": 50,
+        "translatedLines": 0,
+        "koreanLines": 49,
+        "tibetanLines": 0,
+        "diagnostic": "catalog us HTTP 429; expected seconds=274"
+      },
+      "tibetan": {
+        "language": "Tibetan",
+        "title": "Fly",
+        "artist": "ANU",
+        "source": "网易云音乐",
+        "sourceUrl": "https://music.163.com/song?id=479422828",
+        "lines": 68,
+        "originalLines": 68,
+        "translatedLines": 59,
+        "koreanLines": 0,
+        "tibetanLines": 62,
+        "diagnostic": "catalog us HTTP 200; expected seconds=265; candidates=12; best score=121.70600000000002; selected id=1656027491; lyrics HTTP 503"
+      },
+      "french": {
+        "language": "French",
+        "title": "Alors on danse",
+        "artist": "Stromae",
+        "source": "网易云音乐",
+        "sourceUrl": "https://music.163.com/song?id=19086497",
+        "lines": 40,
+        "originalLines": 40,
+        "translatedLines": 38,
+        "koreanLines": 0,
+        "tibetanLines": 0,
+        "diagnostic": "catalog fr HTTP 200; expected seconds=0; candidates=11; best score=122; selected id=1444872841; lyrics HTTP 503"
+      },
+      "spanish": {
+        "language": "Spanish",
+        "title": "DESPECHÁ",
+        "artist": "ROSALÍA",
+        "source": "网易云音乐",
+        "sourceUrl": "https://music.163.com/song?id=1967666113",
+        "lines": 57,
+        "originalLines": 57,
+        "translatedLines": 43,
+        "koreanLines": 0,
+        "tibetanLines": 0,
+        "diagnostic": "catalog us HTTP 429; expected seconds=0"
+      }
+    }
+  },
+  "limits": [
+    "位置计算覆盖 100%、125%、150%、200%；实际窗口验证是在本机 125% 缩放进行。",
+    "实际窗口与菜单处理函数经过验证，但没有连续播放音乐进行完整试听。",
+    "本轮未复测在线歌词服务，也没有新增歌词来源。"
+  ]
+}

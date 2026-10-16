@@ -1,0 +1,374 @@
+<Window x:Class="DesktopLyrics.Views.TaskbarLyricsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:DesktopLyrics.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converters="clr-namespace:DesktopLyrics.Converters"
+        mc:Ignorable="d"
+        Title="LyricBar JP"
+        ToolTip="{Binding SourceStatus}"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowActivated="False"
+        Focusable="False"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        Width="520"
+        Height="44"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="ClearType"
+        RenderOptions.ClearTypeHint="Enabled"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown"
+        LocationChanged="Window_LocationChanged"
+        SizeChanged="Window_SizeChanged">
+
+    <Window.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <converters:InverseBooleanToVisibilityConverter x:Key="InvBoolToVis" />
+
+        <!-- Dynamic Themed Media Control Button Style -->
+        <Style x:Key="MediaControlBtn" TargetType="Button">
+            <Setter Property="Background" Value="{Binding ControlButtonBgBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                CornerRadius="12"
+                                Background="{TemplateBinding Background}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#FF3B30"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#D32F2F"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <!-- Invisible background (#01000000) makes the ENTIRE area hit-testable -->
+    <Grid Background="#01000000" x:Name="RootGrid">
+        <!-- Edit Mode Drag & Resize Guide (Only shown when Unlocked) -->
+        <Border BorderThickness="1.5"
+                BorderBrush="#00E5FF"
+                CornerRadius="6"
+                Background="#900A0A14"
+                Visibility="{Binding IsLocked, Converter={StaticResource InvBoolToVis}}">
+            <Grid>
+                <TextBlock Text="✋ 按住拖动位置  |  ↔️ 拖动右侧手柄调整长度 (右键托盘锁定)"
+                           FontSize="9.5"
+                           Foreground="#80D8FF"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top"
+                           Margin="8,1,0,0"
+                           FontFamily="Segoe UI, Microsoft YaHei UI"/>
+
+                <!-- Right Edge Resize Handle (Drag to adjust width) -->
+                <Thumb x:Name="RightResizeThumb"
+                       HorizontalAlignment="Right"
+                       Width="16"
+                       Cursor="SizeWE"
+                       DragDelta="RightResizeThumb_DragDelta"
+                       DragCompleted="RightResizeThumb_DragCompleted">
+                    <Thumb.Template>
+                        <ControlTemplate TargetType="Thumb">
+                            <Border Background="Transparent">
+                                <Border Background="#00E5FF"
+                                        CornerRadius="2"
+                                        Width="4"
+                                        Height="22"
+                                        Opacity="0.9"
+                                        HorizontalAlignment="Right"
+                                        Margin="0,0,2,0"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Thumb.Template>
+                </Thumb>
+            </Grid>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Grid Margin="2,0,4,1" VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <!-- Left: Cover + Title + Artist -->
+                <ColumnDefinition Width="Auto"/>
+                <!-- Divider -->
+                <ColumnDefinition Width="Auto"/>
+                <!-- Middle: Continuous Dancing Red Waveform -->
+                <ColumnDefinition Width="Auto"/>
+                <!-- Right: Lyrics + Slide-in Controls Container -->
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 1. Left Section: Cover Art + Track Info -->
+            <views:TrackInfoPresenter Grid.Column="0" VerticalAlignment="Center"
+                Title="{Binding TrackTitle}" Artist="{Binding TrackArtist}" Cover="{Binding CoverArt}"
+                PrimaryBrush="{Binding PrimaryTextBrush}" SecondaryBrush="{Binding SecondaryTextBrush}"
+                EnableTransition="{Binding EnableTrackTransition}" DurationMilliseconds="{Binding CrossfadeDurationMilliseconds}"
+                FrameVersion="{Binding TrackFrameVersion}"/>
+
+            <!-- 2. Vertical Divider -->
+            <Rectangle Grid.Column="1"
+                       Width="1"
+                       Height="20"
+                       Fill="{Binding DividerBrush}"
+                       VerticalAlignment="Center"
+                       Margin="8,0,8,0"/>
+
+            <!-- 3. Middle Section: Dynamic Red Waveform (Jumps only when Playing!) -->
+            <StackPanel Grid.Column="2"
+                        x:Name="WaveformPanel"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        Margin="0,0,8,0">
+
+                <Rectangle Width="2.5" Fill="#FF3B30" RadiusX="1.2" RadiusY="1.2" Margin="1.5,0" VerticalAlignment="Center" Height="20" RenderTransformOrigin="0.5,0.5">
+                    <Rectangle.RenderTransform><ScaleTransform ScaleY="0.2"/></Rectangle.RenderTransform>
+                    <Rectangle.Style>
+                        <Style TargetType="Rectangle">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard x:Name="PlayAnim1">
+                                            <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                                 From="0.15" To="0.7" Duration="0:0:0.42"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <StopStoryboard BeginStoryboardName="PlayAnim1"/>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Rectangle.Style>
+                </Rectangle>
+
+                <Rectangle Width="2.5" Fill="#FF3B30" RadiusX="1.2" RadiusY="1.2" Margin="1.5,0" VerticalAlignment="Center" Height="20" RenderTransformOrigin="0.5,0.5">
+                    <Rectangle.RenderTransform><ScaleTransform ScaleY="0.35"/></Rectangle.RenderTransform>
+                    <Rectangle.Style>
+                        <Style TargetType="Rectangle">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard x:Name="PlayAnim2">
+                                            <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                                 From="0.75" To="0.25" Duration="0:0:0.35"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <StopStoryboard BeginStoryboardName="PlayAnim2"/>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Rectangle.Style>
+                </Rectangle>
+
+                <Rectangle Width="2.5" Fill="#FF3B30" RadiusX="1.2" RadiusY="1.2" Margin="1.5,0" VerticalAlignment="Center" Height="20" RenderTransformOrigin="0.5,0.5">
+                    <Rectangle.RenderTransform><ScaleTransform ScaleY="0.5"/></Rectangle.RenderTransform>
+                    <Rectangle.Style>
+                        <Style TargetType="Rectangle">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard x:Name="PlayAnim3">
+                                            <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                                 From="0.3" To="0.95" Duration="0:0:0.48"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <StopStoryboard BeginStoryboardName="PlayAnim3"/>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Rectangle.Style>
+                </Rectangle>
+
+                <Rectangle Width="2.5" Fill="#FF3B30" RadiusX="1.2" RadiusY="1.2" Margin="1.5,0" VerticalAlignment="Center" Height="20" RenderTransformOrigin="0.5,0.5">
+                    <Rectangle.RenderTransform><ScaleTransform ScaleY="0.3"/></Rectangle.RenderTransform>
+                    <Rectangle.Style>
+                        <Style TargetType="Rectangle">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard x:Name="PlayAnim4">
+                                            <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                                 From="0.85" To="0.2" Duration="0:0:0.38"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <StopStoryboard BeginStoryboardName="PlayAnim4"/>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Rectangle.Style>
+                </Rectangle>
+
+                <Rectangle Width="2.5" Fill="#FF3B30" RadiusX="1.2" RadiusY="1.2" Margin="1.5,0" VerticalAlignment="Center" Height="20" RenderTransformOrigin="0.5,0.5">
+                    <Rectangle.RenderTransform><ScaleTransform ScaleY="0.15"/></Rectangle.RenderTransform>
+                    <Rectangle.Style>
+                        <Style TargetType="Rectangle">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard x:Name="PlayAnim5">
+                                            <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                                 From="0.15" To="0.65" Duration="0:0:0.44"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <StopStoryboard BeginStoryboardName="PlayAnim5"/>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Rectangle.Style>
+                </Rectangle>
+            </StackPanel>
+
+            <!-- 4. Right Section: Synced Lyrics + Premium Vector Playback Controls -->
+            <Grid Grid.Column="3" VerticalAlignment="Center">
+                <!-- Hover Controls -->
+                <StackPanel x:Name="HoverControlsPanel"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Opacity="0"
+                            IsHitTestVisible="False">
+                    <StackPanel.RenderTransform>
+                        <TranslateTransform x:Name="ControlsTranslate" X="-10" Y="0"/>
+                    </StackPanel.RenderTransform>
+
+                    <!-- Previous Track Button -->
+                    <Button Style="{StaticResource MediaControlBtn}"
+                            ToolTip="上一首"
+                            Click="PrevButton_Click">
+                        <Path Data="M 1,1.5 L 3,1.5 L 3,12.5 L 1,12.5 Z M 12,2 L 4.5,7 L 12,12 Z"
+                              Fill="{Binding ControlIconBrush}"
+                              Stretch="Uniform"
+                              Width="10" Height="10"/>
+                    </Button>
+
+                    <!-- Play / Pause Button -->
+                    <Button Style="{StaticResource MediaControlBtn}"
+                            Width="26" Height="26"
+                            ToolTip="播放 / 暂停"
+                            Click="PlayPauseButton_Click">
+                        <Grid>
+                            <!-- Pause Vector Icon -->
+                            <Path Data="M 1.5,1.5 L 4.5,1.5 L 4.5,12.5 L 1.5,12.5 Z M 7.5,1.5 L 10.5,1.5 L 10.5,12.5 L 7.5,12.5 Z"
+                                  Fill="{Binding ControlIconBrush}"
+                                  Stretch="Uniform"
+                                  Width="10" Height="10"
+                                  Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVis}}"/>
+                            <!-- Play Vector Icon -->
+                            <Path Data="M 2.5,1.5 L 12.5,7 L 2.5,12.5 Z"
+                                  Fill="{Binding ControlIconBrush}"
+                                  Stretch="Uniform"
+                                  Width="10" Height="10"
+                                  Margin="1,0,0,0"
+                                  Visibility="{Binding IsPlaying, Converter={StaticResource InvBoolToVis}}"/>
+                        </Grid>
+                    </Button>
+
+                    <!-- Next Track Button -->
+                    <Button Style="{StaticResource MediaControlBtn}"
+                            ToolTip="下一首"
+                            Click="NextButton_Click">
+                        <Path Data="M 1,2 L 8.5,7 L 1,12 Z M 10,1.5 L 12,1.5 L 12,12.5 L 10,12.5 Z"
+                              Fill="{Binding ControlIconBrush}"
+                              Stretch="Uniform"
+                              Width="10" Height="10"/>
+                    </Button>
+                </StackPanel>
+
+                <!-- Lyrics Container -->
+                <Grid x:Name="LyricsContainer" VerticalAlignment="Center" Margin="0,-2.5,0,0">
+                    <Grid.RenderTransform>
+                        <TranslateTransform x:Name="LyricsTranslate" X="0" Y="0"/>
+                    </Grid.RenderTransform>
+
+                    <views:LyricsPresenter x:Name="LyricDisplay"
+                        PrimaryText="{Binding PrimaryLyric}" SecondaryText="{Binding SecondaryLyric}"
+                        IsDualLine="{Binding IsDualLine}" PrimaryBrush="{Binding PrimaryTextBrush}" SecondaryBrush="{Binding SecondaryTextBrush}"
+                        EnableCrossfade="{Binding EnableCrossfade}" FadeMilliseconds="{Binding CrossfadeDurationMilliseconds}"
+                        MarqueeDelayMilliseconds="{Binding MarqueeStartDelayMilliseconds}" LineSeconds="{Binding LineRemainingSeconds}"
+                        FrameVersion="{Binding LyricFrameVersion}" AnimateChange="{Binding AnimateLyricChange}" TransitionMode="{Binding LyricTransition}"/>
+                </Grid>
+            </Grid>
+        </Grid>
+
+    </Grid>
+
+    <!-- Global Hover Animation Triggers -->
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="MouseEnter">
+            <BeginStoryboard>
+                <Storyboard>
+                    <!-- 1. Lyrics slide smoothly to the right by 102px -->
+                    <DoubleAnimation Storyboard.TargetName="LyricsTranslate"
+                                     Storyboard.TargetProperty="X"
+                                     To="102" Duration="0:0:0.32"
+                                     DecelerationRatio="0.8"/>
+
+                    <!-- 2. Minimalist vector controls fade in & slide in next to the red waveform -->
+                    <DoubleAnimation Storyboard.TargetName="HoverControlsPanel"
+                                     Storyboard.TargetProperty="Opacity"
+                                     To="1" BeginTime="0:0:0.06" Duration="0:0:0.22"/>
+                    <DoubleAnimation Storyboard.TargetName="ControlsTranslate"
+                                     Storyboard.TargetProperty="X"
+                                     To="0" BeginTime="0:0:0.06" Duration="0:0:0.24"
+                                     DecelerationRatio="0.8"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="MouseLeave">
+            <BeginStoryboard>
+                <Storyboard>
+                    <!-- 1. Controls fade out & slide back -->
+                    <DoubleAnimation Storyboard.TargetName="HoverControlsPanel"
+                                     Storyboard.TargetProperty="Opacity"
+                                     To="0" Duration="0:0:0.15"/>
+                    <DoubleAnimation Storyboard.TargetName="ControlsTranslate"
+                                     Storyboard.TargetProperty="X"
+                                     To="-10" Duration="0:0:0.15"/>
+
+                    <!-- 2. Lyrics slide smoothly back to left (right next to red waveform) -->
+                    <DoubleAnimation Storyboard.TargetName="LyricsTranslate"
+                                     Storyboard.TargetProperty="X"
+                                     To="0" BeginTime="0:0:0.04" Duration="0:0:0.28"
+                                     DecelerationRatio="0.7"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
+</Window>
